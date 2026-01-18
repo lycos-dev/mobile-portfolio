@@ -637,7 +637,9 @@ const App: FC = () => {
   const handleNavPress = (section: string) => {
     const position = sectionPositions[section];
     if (position !== undefined && scrollRef.current) {
-      scrollRef.current.scrollTo({ y: position, animated: true });
+      // Subtract a small offset to account for navbar and get closer to the section
+      const offset = 5; // 5px margin from the top
+      scrollRef.current.scrollTo({ y: position - offset, animated: true });
     }
   };
 
@@ -647,9 +649,12 @@ const App: FC = () => {
     let closestSection = 'Profile';
     let minDiff = Infinity;
 
+    // Add a small threshold to detect section transitions more accurately
+    const threshold = 50;
+
     Object.entries(sectionPositions).forEach(([section, pos]) => {
       const diff = Math.abs(currentY - pos);
-      if (diff < minDiff) {
+      if (diff < minDiff && currentY >= pos - threshold) {
         minDiff = diff;
         closestSection = section;
       }
@@ -671,19 +676,42 @@ const App: FC = () => {
               <View style={[styles.container, { backgroundColor: theme.background }]}>
                 <FloatingParticles />
                 <SafeAreaView style={{ flex: 1 }}>
-                  <TouchableOpacity 
-                    style={[styles.menuButton, { backgroundColor: theme.card, borderColor: theme.border }]}
-                    onPress={() => setMenuVisible(true)}
-                  >
-                    <FontAwesome name="bars" size={20} color={theme.text} />
-                  </TouchableOpacity>
-
-                  <SidebarMenu
-                    visible={menuVisible}
-                    onClose={() => setMenuVisible(false)}
-                    onNavPress={handleNavPress}
-                    activeSection={activeSection}
-                  />
+                  <View style={[styles.navbar, { backgroundColor: theme.card, borderBottomColor: theme.border }]}>
+                    {navItems.map((item) => {
+                      const isActive = activeSection === item.name;
+                      return (
+                        <TouchableOpacity
+                          key={item.name}
+                          onPress={() => handleNavPress(item.name)}
+                          style={[
+                            styles.navButton,
+                            { backgroundColor: isActive ? theme.text : 'transparent' }
+                          ]}
+                          activeOpacity={0.7}
+                        >
+                          <FontAwesome 
+                            name={item.icon} 
+                            size={20} 
+                            color={isActive ? theme.background : theme.textSecondary} 
+                          />
+                        </TouchableOpacity>
+                      );
+                    })}
+                    <TouchableOpacity 
+                      onPress={() => {
+                        const { toggleTheme } = value;
+                        toggleTheme();
+                      }}
+                      style={styles.navButton}
+                      activeOpacity={0.7}
+                    >
+                      <FontAwesome 
+                        name={value.isDarkMode ? "moon-o" : "sun-o"} 
+                        size={20} 
+                        color={theme.textSecondary} 
+                      />
+                    </TouchableOpacity>
+                  </View>
 
                   <ScrollView
                     ref={scrollRef}
@@ -693,7 +721,6 @@ const App: FC = () => {
                     scrollEventThrottle={16}
                   >
                     <View style={styles.contentWrapper}>
-                      <ThemeToggle />
                       <Profile onLayout={handleLayout('Profile')} />
                       <Skills onLayout={handleLayout('Skills')} />
                       <Contact onLayout={handleLayout('Contact')} />
@@ -806,12 +833,56 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    paddingTop: 80,
+    paddingTop: 5,
   },
   contentWrapper: {
     width: '100%',
     paddingHorizontal: 16,
     alignItems: 'stretch',
+  },
+  navbar: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    marginHorizontal: 16,
+    marginTop: 12,
+    marginBottom: 8,
+    borderRadius: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    elevation: 6,
+  },
+  navButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: 4,
+  },
+  navIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 4,
+  },
+  navLabel: {
+    fontSize: 10,
+    fontWeight: '600',
+    marginTop: 2,
+  },
+  navActiveIndicator: {
+    width: 24,
+    height: 3,
+    borderRadius: 2,
+    position: 'absolute',
+    bottom: 0,
   },
   profile: {
     alignItems: 'center',
