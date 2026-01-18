@@ -1,5 +1,5 @@
 import React, { useState, createContext, useContext, FC, ReactNode, useRef, useEffect, useCallback } from 'react';
-import { View, Text, Image, ScrollView, FlatList, Switch, StyleSheet, Linking, TouchableOpacity, LayoutChangeEvent, Dimensions, Animated, Easing, Modal } from 'react-native';
+import { View, Text, Image, ScrollView, FlatList, Switch, StyleSheet, Linking, TouchableOpacity, LayoutChangeEvent, Dimensions, Animated, Easing, Modal, RefreshControl } from 'react-native';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { FontAwesome } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -356,13 +356,11 @@ const Profile: FC<{ onLayout: (event: LayoutChangeEvent) => void }> = ({ onLayou
     <AnimatedSection onLayout={onLayout}>
       <View style={[styles.profile, { backgroundColor: theme.card, borderColor: theme.border }]}>
         <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
-          <View style={[styles.profilePicOuter, { borderColor: theme.border }]}>
-            <View style={[styles.profilePicContainer, { backgroundColor: theme.highlight }]}>
-              <Image
-                source={{ uri: 'https://cdn.discordapp.com/avatars/901724726148362300/bff114eb6685fd4ec97e8642a4304930.png?size=1024' }}
-                style={styles.profilePic}
-              />
-            </View>
+          <View style={[styles.profilePicContainer, { backgroundColor: theme.highlight }]}>
+            <Image
+              source={{ uri: 'https://cdn.discordapp.com/avatars/901724726148362300/bff114eb6685fd4ec97e8642a4304930.png?size=1024' }}
+              style={styles.profilePic}
+            />
           </View>
         </Animated.View>
         <Text style={[styles.name, { color: theme.text }]}>Hi! I'm Lycos</Text>
@@ -628,6 +626,16 @@ const App: FC = () => {
   const [sectionPositions, setSectionPositions] = useState<Record<string, number>>({});
   const [activeSection, setActiveSection] = useState('Profile');
   const [menuVisible, setMenuVisible] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const scrollY = useRef(new Animated.Value(0)).current;
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    // Simulate refresh delay
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 1500);
+  }, []);
 
   const handleLayout = (section: string) => (event: LayoutChangeEvent) => {
     const { y } = event.nativeEvent.layout;
@@ -672,9 +680,36 @@ const App: FC = () => {
               throw new Error('ThemeContext must be used within a ThemeProvider');
             }
             const { theme } = value;
+            
+            // Calculate scroll progress (0 to 1)
+            const scrollProgress = scrollY.interpolate({
+              inputRange: [0, 1000],
+              outputRange: [0, 1],
+              extrapolate: 'clamp',
+            });
+
+            const progressWidth = scrollProgress.interpolate({
+              inputRange: [0, 1],
+              outputRange: ['0%', '100%'],
+            });
+
             return (
               <View style={[styles.container, { backgroundColor: theme.background }]}>
                 <FloatingParticles />
+                
+                {/* Scroll Progress Bar */}
+                <View style={[styles.progressBarContainer, { backgroundColor: theme.border }]}>
+                  <Animated.View 
+                    style={[
+                      styles.progressBar, 
+                      { 
+                        width: progressWidth,
+                        backgroundColor: theme.text 
+                      }
+                    ]} 
+                  />
+                </View>
+
                 <SafeAreaView style={{ flex: 1 }}>
                   <View style={[styles.navbar, { backgroundColor: theme.card, borderBottomColor: theme.border }]}>
                     {navItems.map((item) => {
@@ -717,8 +752,24 @@ const App: FC = () => {
                     ref={scrollRef}
                     contentContainerStyle={styles.scrollContent}
                     showsVerticalScrollIndicator={false}
-                    onScroll={handleScroll}
+                    onScroll={Animated.event(
+                      [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+                      { 
+                        useNativeDriver: false,
+                        listener: handleScroll
+                      }
+                    )}
                     scrollEventThrottle={16}
+                    refreshControl={
+                      <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={onRefresh}
+                        tintColor={theme.text}
+                        colors={[theme.text]}
+                      />
+                    }
+                    bounces={true}
+                    bouncesZoom={true}
                   >
                     <View style={styles.contentWrapper}>
                       <Profile onLayout={handleLayout('Profile')} />
@@ -896,12 +947,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 12,
     elevation: 4,
-  },
-  profilePicOuter: {
-    padding: 3,
-    borderRadius: 50,
-    borderWidth: 2,
-    borderStyle: 'dashed',
   },
   profilePicContainer: {
     padding: 4,
