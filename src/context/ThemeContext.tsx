@@ -1,4 +1,4 @@
-import React, { createContext, FC, ReactNode, useState } from 'react';
+import React, { useState, createContext, FC, ReactNode } from 'react';
 
 export interface Theme {
   background: string;

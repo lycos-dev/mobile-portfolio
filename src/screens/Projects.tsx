@@ -1,9 +1,9 @@
 import React, { FC, useContext } from 'react';
 import { View, Text, LayoutChangeEvent } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
+import styles from '../styles/globalStyles';
 import { ThemeContext } from '../context/ThemeContext';
 import AnimatedSection from '../components/AnimatedSection';
-import styles from '../styles/globalStyles';
 
 interface Project {
   id: string;
@@ -33,9 +33,9 @@ const Projects: FC<{ onLayout: (event: LayoutChangeEvent) => void }> = ({ onLayo
         </View>
 
         <View style={styles.projectsGrid}>
-          {projects.map(project => (
+          {projects.map((item) => (
             <View
-              key={project.id}
+              key={item.id}
               style={[styles.projectCard, { backgroundColor: theme.surface, borderColor: theme.border }]}
             >
               <View style={styles.projectHeader}>
@@ -45,11 +45,11 @@ const Projects: FC<{ onLayout: (event: LayoutChangeEvent) => void }> = ({ onLayo
                 <FontAwesome name="external-link" size={12} color={theme.textSecondary} />
               </View>
 
-              <Text style={[styles.projectTitle, { color: theme.text }]}>{project.title}</Text>
-              <Text style={[styles.projectDesc, { color: theme.textSecondary }]}>{project.description}</Text>
+              <Text style={[styles.projectTitle, { color: theme.text }]}>{item.title}</Text>
+              <Text style={[styles.projectDesc, { color: theme.textSecondary }]}>{item.description}</Text>
 
               <View style={styles.projectTags}>
-                {project.tags.map((tag, idx) => (
+                {item.tags.map((tag, idx) => (
                   <View key={idx} style={[styles.tag, { backgroundColor: theme.primary, borderColor: theme.border }]}>
                     <Text style={[styles.tagText, { color: theme.textSecondary }]}>{tag}</Text>
                   </View>

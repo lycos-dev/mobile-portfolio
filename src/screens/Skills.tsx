@@ -1,19 +1,21 @@
-import React, { FC, useContext, useEffect, useRef, useState } from 'react';
-import { View, Text, Animated, LayoutChangeEvent } from 'react-native';
+import React, { FC, useContext, useState } from 'react';
+import { View, Text, LayoutChangeEvent, Animated } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
+import styles from '../styles/globalStyles';
 import { ThemeContext } from '../context/ThemeContext';
 import AnimatedSection from '../components/AnimatedSection';
-import styles from '../styles/globalStyles';
 
-const SkillCard: FC<{
-  skill: { name: string; level: number; icon: string };
-  index: number;
-  inView: boolean;
-}> = ({ skill, index, inView }) => {
+interface Skill {
+  name: string;
+  level: number;
+  icon: string;
+}
+
+const SkillCard: FC<{ skill: Skill; index: number; inView: boolean }> = ({ skill, index, inView }) => {
   const { theme, isDarkMode } = useContext(ThemeContext)!;
-  const barWidth = useRef(new Animated.Value(0)).current;
+  const barWidth = React.useRef(new Animated.Value(0)).current;
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (inView) {
       Animated.spring(barWidth, {
         toValue: skill.level,
@@ -40,7 +42,6 @@ const SkillCard: FC<{
           </View>
           <Text style={[styles.skillLevel, { color: theme.textSecondary }]}>{skill.level}%</Text>
         </View>
-
         <View style={[styles.skillBarContainer, { backgroundColor: theme.accent }]}>
           <Animated.View
             style={[
@@ -61,7 +62,7 @@ const Skills: FC<{ onLayout: (event: LayoutChangeEvent) => void }> = ({ onLayout
   const { theme } = useContext(ThemeContext)!;
   const [inView, setInView] = useState(false);
 
-  const skills = [
+  const skills: Skill[] = [
     { name: 'C++', level: 85, icon: 'code' },
     { name: 'Java', level: 85, icon: 'coffee' },
     { name: 'Javascript', level: 90, icon: 'code' },

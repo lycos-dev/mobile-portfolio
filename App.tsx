@@ -1,29 +1,21 @@
-import React, { useRef, useState, useCallback } from 'react';
-import { View, ScrollView, Animated, RefreshControl, TouchableOpacity } from 'react-native';
+import React, { FC, useRef, useState, useCallback } from 'react';
+import { View, ScrollView, RefreshControl, Animated, LayoutChangeEvent } from 'react-native';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
-import { FontAwesome } from '@expo/vector-icons';
+import styles from './src/styles/globalStyles';
 
-import { ThemeProvider, useTheme } from './src/context/ThemeContext';
+import { ThemeProvider, ThemeContext } from './src/context/ThemeContext';
 import FloatingParticles from './src/components/FloatingParticles';
-import SidebarMenu from './src/components/SidebarMenu';
+import Navbar from './src/components/Navbar';
+
 import Profile from './src/screens/Profile';
 import Skills from './src/screens/Skills';
 import Contact from './src/screens/Contact';
 import Projects from './src/screens/Projects';
-import styles from './src/styles/globalStyles';
 
-const navItems = [
-  { name: 'Profile', icon: 'user' },
-  { name: 'Skills', icon: 'code' },
-  { name: 'Contact', icon: 'envelope' },
-  { name: 'Projects', icon: 'folder-open' },
-];
-
-const App = () => {
+const App: FC = () => {
   const scrollRef = useRef<ScrollView>(null);
   const [sectionPositions, setSectionPositions] = useState<Record<string, number>>({});
   const [activeSection, setActiveSection] = useState('Profile');
-  const [menuVisible, setMenuVisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const scrollY = useRef(new Animated.Value(0)).current;
 
@@ -32,9 +24,9 @@ const App = () => {
     setTimeout(() => setRefreshing(false), 1500);
   }, []);
 
-  const handleLayout = (section: string) => (event: any) => {
+  const handleLayout = (section: string) => (event: LayoutChangeEvent) => {
     const { y } = event.nativeEvent.layout;
-    setSectionPositions(prev => ({ ...prev, [section]: y }));
+    setSectionPositions((prev) => ({ ...prev, [section]: y }));
   };
 
   const handleNavPress = (section: string) => {
@@ -44,7 +36,7 @@ const App = () => {
     }
   };
 
-  const handleScroll = useCallback(({ nativeEvent }: { nativeEvent: any }) => {
+  const handleScroll = ({ nativeEvent }: { nativeEvent: any }) => {
     const currentY = nativeEvent.contentOffset.y;
     let closestSection = 'Profile';
     let minDiff = Infinity;
@@ -59,30 +51,54 @@ const App = () => {
     });
 
     setActiveSection(closestSection);
-  }, [sectionPositions]);
+  };
 
   return (
     <SafeAreaProvider>
       <ThemeProvider>
-        <ScrollView
-          ref={scrollRef}
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-          onScroll={Animated.event(
-            [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-            { useNativeDriver: false, listener: handleScroll }
-          )}
-          scrollEventThrottle={16}
-          refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-          }
-        >
-          <FloatingParticles />
-          <Profile onLayout={handleLayout('Profile')} />
-          <Skills onLayout={handleLayout('Skills')} />
-          <Contact onLayout={handleLayout('Contact')} />
-          <Projects onLayout={handleLayout('Projects')} />
-        </ScrollView>
+        <ThemeContext.Consumer>
+          {(value) => {
+            if (!value) return null;
+            const { theme } = value;
+
+            return (
+              <View style={[styles.container, { backgroundColor: theme.background }]}>
+                <FloatingParticles />
+
+                <SafeAreaView style={{ flex: 1 }}>
+                  <Navbar activeSection={activeSection} onNavPress={handleNavPress} />
+
+                  <ScrollView
+                    ref={scrollRef}
+                    contentContainerStyle={styles.scrollContent}
+                    showsVerticalScrollIndicator={false}
+                    onScroll={Animated.event(
+                      [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+                      { useNativeDriver: false, listener: handleScroll }
+                    )}
+                    scrollEventThrottle={16}
+                    refreshControl={
+                      <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={onRefresh}
+                        tintColor={theme.text}
+                        colors={[theme.text]}
+                      />
+                    }
+                  >
+                    <View style={styles.contentWrapper}>
+                      <Profile onLayout={handleLayout('Profile')} />
+                      <Skills onLayout={handleLayout('Skills')} />
+                      <Contact onLayout={handleLayout('Contact')} />
+                      <Projects onLayout={handleLayout('Projects')} />
+                      <View style={{ height: 40 }} />
+                    </View>
+                  </ScrollView>
+                </SafeAreaView>
+              </View>
+            );
+          }}
+        </ThemeContext.Consumer>
       </ThemeProvider>
     </SafeAreaProvider>
   );

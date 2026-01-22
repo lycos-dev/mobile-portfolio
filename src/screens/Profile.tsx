@@ -1,10 +1,10 @@
-import React, { FC, useContext, useEffect, useRef } from 'react';
+import React, { FC, useContext, useRef, useEffect } from 'react';
 import { View, Text, Image, Animated, Easing, LayoutChangeEvent } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
+import styles from '../styles/globalStyles';
 import { ThemeContext } from '../context/ThemeContext';
 import AnimatedSection from '../components/AnimatedSection';
 import AnimatedCounter from '../components/AnimatedCounter';
-import styles from '../styles/globalStyles';
 
 const Profile: FC<{ onLayout: (event: LayoutChangeEvent) => void }> = ({ onLayout }) => {
   const { theme } = useContext(ThemeContext)!;

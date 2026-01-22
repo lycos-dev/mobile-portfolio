@@ -1,10 +1,10 @@
-import React, { FC, useContext, useEffect, useRef } from 'react';
-import { Animated, Dimensions, Easing, StyleSheet, View } from 'react-native';
+import React, { FC, useRef, useEffect, useContext } from 'react';
+import { View, Dimensions, Animated, Easing } from 'react-native';
+import styles from '../styles/globalStyles';
 import { ThemeContext } from '../context/ThemeContext';
 
 const FloatingParticles: FC = () => {
   const { theme } = useContext(ThemeContext)!;
-
   const particles = useRef(
     Array.from({ length: 15 }, (_, i) => ({
       id: i,
@@ -53,18 +53,21 @@ const FloatingParticles: FC = () => {
   }, []);
 
   return (
-    <View style={styles.container} pointerEvents="none">
-      {particles.map(p => (
+    <View style={styles.particlesContainer} pointerEvents="none">
+      {particles.map((particle) => (
         <Animated.View
-          key={p.id}
+          key={particle.id}
           style={[
             styles.particle,
             {
-              width: p.size,
-              height: p.size,
+              width: particle.size,
+              height: particle.size,
               backgroundColor: theme.text,
-              opacity: p.opacity,
-              transform: [{ translateX: p.x }, { translateY: p.y }],
+              opacity: particle.opacity,
+              transform: [
+                { translateX: particle.x },
+                { translateY: particle.y },
+              ],
             },
           ]}
         />
@@ -72,17 +75,5 @@ const FloatingParticles: FC = () => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
-  },
-  particle: {
-    position: 'absolute',
-    borderRadius: 50,
-  },
-});
 
 export default FloatingParticles;

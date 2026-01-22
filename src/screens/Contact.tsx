@@ -1,9 +1,9 @@
 import React, { FC, useContext } from 'react';
 import { View, Text, TouchableOpacity, Linking, LayoutChangeEvent } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
+import styles from '../styles/globalStyles';
 import { ThemeContext } from '../context/ThemeContext';
 import AnimatedSection from '../components/AnimatedSection';
-import styles from '../styles/globalStyles';
 
 interface ContactItem {
   type: string;

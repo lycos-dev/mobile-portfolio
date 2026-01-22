@@ -1,10 +1,10 @@
-import React, { FC, ReactNode, useEffect, useRef } from 'react';
+import React, { FC, ReactNode, useRef, useEffect } from 'react';
 import { Animated, Easing, LayoutChangeEvent } from 'react-native';
 
-const AnimatedSection: FC<{
-  children: ReactNode;
-  onLayout: (event: LayoutChangeEvent) => void;
-  delay?: number;
+const AnimatedSection: FC<{ 
+  children: ReactNode; 
+  onLayout: (event: LayoutChangeEvent) => void; 
+  delay?: number 
 }> = ({ children, onLayout, delay = 0 }) => {
   const animValue = useRef(new Animated.Value(0)).current;
   const scaleValue = useRef(new Animated.Value(0.95)).current;
@@ -24,7 +24,7 @@ const AnimatedSection: FC<{
         tension: 50,
         friction: 7,
         useNativeDriver: true,
-      }),
+      })
     ]).start();
   }, []);
 
@@ -34,8 +34,11 @@ const AnimatedSection: FC<{
   });
 
   return (
-    <Animated.View
-      style={{ transform: [{ translateY }, { scale: scaleValue }], opacity: animValue }}
+    <Animated.View 
+      style={{ 
+        transform: [{ translateY }, { scale: scaleValue }], 
+        opacity: animValue 
+      }} 
       onLayout={onLayout}
     >
       {children}

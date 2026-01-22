@@ -1,12 +1,12 @@
-import React, { FC, useContext, useEffect, useState } from 'react';
+import React, { FC, useEffect, useState, useContext } from 'react';
 import { Text } from 'react-native';
-import { ThemeContext } from '../context/ThemeContext';
 import styles from '../styles/globalStyles';
+import { ThemeContext } from '../context/ThemeContext';
 
-const AnimatedCounter: FC<{ end: number; duration?: number; suffix?: string }> = ({
-  end,
+const AnimatedCounter: FC<{ end: number; duration?: number; suffix?: string }> = ({ 
+  end, 
   duration = 2000,
-  suffix = '',
+  suffix = '' 
 }) => {
   const { theme } = useContext(ThemeContext)!;
   const [count, setCount] = useState(0);
@@ -19,8 +19,11 @@ const AnimatedCounter: FC<{ end: number; duration?: number; suffix?: string }> =
       if (!startTime) startTime = timestamp;
       const progress = timestamp - startTime;
       const percentage = Math.min(progress / duration, 1);
+      
       const easeOut = 1 - Math.pow(1 - percentage, 3);
-      setCount(Math.floor(easeOut * end));
+      const currentCount = Math.floor(easeOut * end);
+      
+      setCount(currentCount);
 
       if (percentage < 1) {
         animationFrame = requestAnimationFrame(animate);
