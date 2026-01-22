@@ -35,7 +35,7 @@ const Profile: FC<{ onLayout: (event: LayoutChangeEvent) => void }> = ({ onLayou
         <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
           <View style={[styles.profilePicContainer, { backgroundColor: theme.highlight }]}>
             <Image
-              source={{ uri: 'https://cdn.discordapp.com/avatars/901724726148362300/bff114eb6685fd4ec97e8642a4304930.png?size=1024' }}
+              source={{ uri: 'https://img.sanishtech.com/u/7673c4616628bce802561f1f97eb7bc0.jpg' }}
               style={styles.profilePic}
             />
           </View>
